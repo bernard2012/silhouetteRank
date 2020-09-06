@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: silhouetteRank
+Version: 1.0.0
+Summary: silhouetteRank is a tool for finding spatially variable genes based on computing silhouette coefficient from binarized spatial gene expression data
+Home-page: https://bitbucket.org/qzhu/silhouetteRank
+Author: Qian Zhu
+Author-email: zqian@jimmy.harvard.edu
+License: UNKNOWN
+Description: silhouetteRank is a tool for finding spatially variable genes based on computing silhouette coefficient from binarized spatial gene expression data
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.5
+Description-Content-Type: text/markdown
