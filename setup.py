@@ -42,7 +42,7 @@ class CustomCommands(setuptools.Command):
 
 setuptools.setup(
 	name="silhouetteRank",
-	version="1.0.5.10",
+	version="1.0.5.11",
 	author="Qian Zhu",
 	author_email="zqian@jimmy.harvard.edu",
 	description="silhouetteRank is a tool for finding spatially variable genes based on computing silhouette coefficient from binarized spatial gene expression data",

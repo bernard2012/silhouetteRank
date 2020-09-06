@@ -20,8 +20,7 @@ import silhouetteRank.use_previous_cluster as use_previous_cluster
 import silhouetteRank.combine as combine
 import logging
 
-#logdir will be deprecated
-def silhouette_rank(expr="expression.txt", centroid="Xcen.good", overwrite_input_bin=False, rbp_ps=[0.95, 0.99], examine_tops=[0.005, 0.010, 0.050, 0.100, 0.300], matrix_type="dissim", num_core=4, parallel_path="/usr/bin", output=".", query_sizes=10, verbose=True):
+def silhouette_rank(expr="expression.txt", centroid="Xcen.good", overwrite_input_bin=True, rbp_ps=[0.95, 0.99], examine_tops=[0.005, 0.010, 0.050, 0.100, 0.300], matrix_type="dissim", num_core=4, parallel_path="/usr/bin", output=".", query_sizes=10, verbose=True):
 	args = argparse.Namespace(expr=expr, centroid=centroid, rbp_ps=rbp_ps, examine_tops=examine_tops, matrix_type=matrix_type, output=output, query_sizes=query_sizes, overwrite_input_bin=overwrite_input_bin, parallel_path=parallel_path, num_core=num_core, verbose=verbose)
 
 	if not os.path.isdir(args.output):
@@ -31,7 +30,6 @@ def silhouette_rank(expr="expression.txt", centroid="Xcen.good", overwrite_input
 	if not os.path.isdir(logdir):
 		os.mkdir(logdir)
 
-	#verbose=True
 	verbose = args.verbose
 	log_file = "%s/master.log" % args.output
 	logger = logging.getLogger("master")
@@ -98,7 +96,7 @@ def silhouette_rank(expr="expression.txt", centroid="Xcen.good", overwrite_input
 				random_dir = "%s/result_5000_%.2f_%.3f" % (args.output, rbp_p, examine_top)
 				score_file = "%s/silhouette.exact.rbp.%.2f.top.%.3f.txt" % (args.output, rbp_p, examine_top)
 				output_score_file = "%s/silhouette.exact.rbp.%.2f.top.%.3f.pval.txt" % (args.output, rbp_p, examine_top)
-			args1 = argparse.Namespace(expr=args.expr, centroid=args.centroid, examine_top=examine_top, input=score_file, input_random=random_dir, output=output_score_file, outdir=args.output, query_sizes=args.query_sizes, overwrite_input_bin=args.overwrite_input_bin, verbose=verbose, log_file="master.pvalue.log")
+			args1 = argparse.Namespace(expr=args.expr, centroid=args.centroid, examine_top=examine_top, input=score_file, input_random=random_dir, output=output_score_file, outdir=args.output, query_sizes=args.query_sizes, overwrite_input_bin=False, verbose=verbose, log_file="master.pvalue.log")
 			use_previous_cluster.do_one(args1)
 
 	combined_file = "%s/silhouette.overall.pval.txt" % args.output

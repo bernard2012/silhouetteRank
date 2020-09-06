@@ -156,7 +156,7 @@ def random_pattern(matrix=None, matrix_type="dissim", num_cell=None, sizes=None,
 			if shape>0:
 				re_run = True
 		if re_run:
-			if repeats[aSize]>=5:
+			if repeats[aSize]>=10:
 				#sys.stderr.write("Repeats reached, going to next one...\n")
 				#sys.stderr.flush()
 				logger.info("Repeats reached, going to next one...")

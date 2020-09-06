@@ -53,7 +53,7 @@ def main():
 		if verbose:
 			logger.addHandler(logging.StreamHandler())
 
-	args1 = argparse.Namespace(expr=args.expr, centroid=args.centroid, rbp_ps=args.rbp_ps, examine_tops=args.examine_tops, matrix_type=args.matrix_type, output=args.output, query_sizes=args.query_sizes, overwrite_input_bin=args.overwrite_input_bin, verbose=verbose, log_file="master.prep.log")
+	args1 = argparse.Namespace(expr=args.expr, centroid=args.centroid, rbp_ps=args.rbp_ps, examine_tops=args.examine_tops, matrix_type=args.matrix_type, output=args.output, query_sizes=args.query_sizes, overwrite_input_bin=True, verbose=verbose, log_file="master.prep.log")
 	prep.do_one(args1)
 
 
@@ -111,7 +111,7 @@ def main():
 				output_score_file = "%s/silhouette.exact.rbp.%.2f.top.%.3f.pval.txt" % (args.output, rbp_p, examine_top)
 				
 
-			args1 = argparse.Namespace(expr=args.expr, centroid=args.centroid, examine_top=examine_top, input=score_file, input_random=random_dir, output=output_score_file, outdir=args.output, query_sizes=args.query_sizes, overwrite_input_bin=args.overwrite_input_bin, verbose=verbose, log_file="master.pvalue.log")
+			args1 = argparse.Namespace(expr=args.expr, centroid=args.centroid, examine_top=examine_top, input=score_file, input_random=random_dir, output=output_score_file, outdir=args.output, query_sizes=args.query_sizes, overwrite_input_bin=False, verbose=verbose, log_file="master.pvalue.log")
 			use_previous_cluster.do_one(args1)
 
 	combined_file = "%s/silhouette.overall.pval.txt" % args.output
