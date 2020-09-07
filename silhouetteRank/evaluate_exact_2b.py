@@ -13,13 +13,10 @@ from scipy.spatial.distance import squareform, pdist
 from scipy.stats import percentileofscore
 from sklearn.metrics import roc_auc_score
 import argparse
+import logging
 
-def read_matrix(f_expr="expression.txt", f_Xcen = "Xcen.good"):
-	#f_expr = "expression.txt"
-	#f_Xcen = "Xcen.good"
-
-	sys.stderr.write("Reading gene expression...\n")
-	sys.stderr.flush()
+def read_matrix(f_expr="expression.txt", f_Xcen = "Xcen.good", logger=logging):
+	logger.info("Reading gene expression...")
 	f = open(f_expr)
 	h = f.readline().rstrip("\n").split("\t")[1:]
 	num_cell = len(h)
@@ -43,8 +40,7 @@ def read_matrix(f_expr="expression.txt", f_Xcen = "Xcen.good"):
 		ig+=1
 	f.close()
 
-	sys.stderr.write("Reading cell coordinates...\n")
-	sys.stderr.flush()
+	logger.info("Reading cell coordinates...")
 	f = open(f_Xcen)
 	Xcen = np.empty((num_cell, 2), dtype="float32")
 	f.readline()
@@ -57,7 +53,7 @@ def read_matrix(f_expr="expression.txt", f_Xcen = "Xcen.good"):
 	f.close()
 	return expr, genes, Xcen
  
-def read_frequency(expr=None, genes=None, Xcen=None, frequency_file=None, read_from_file=True, outdir="", examine_top=0.05, num_query_sizes=10):
+def read_frequency(expr=None, genes=None, Xcen=None, frequency_file=None, read_from_file=True, outdir="", examine_top=0.05, num_query_sizes=10, logger=logging):
 	num_cell = Xcen.shape[0]
 	ncell = num_cell
 	ex = int((1.0-examine_top)*100.0)
@@ -102,8 +98,7 @@ def read_frequency(expr=None, genes=None, Xcen=None, frequency_file=None, read_f
 		f.close()
 
 	if len(sizes)<=num_query_sizes:
-		sys.stderr.write("Setting num_query_sizes to be %d instead of %d...\n" % (len(sizes), num_query_sizes))
-		sys.stderr.flush()
+		logger.info("Setting num_query_sizes to be %d instead of %d..." % (len(sizes), num_query_sizes))
 		num_query_sizes = len(sizes) 
 
 	cmd = "cd '%s' && Rscript do_kmeans.R gene.freq.good.txt 1 %d 1000 km_centroid.txt km_label.txt" % (outdir, num_query_sizes)
@@ -144,22 +139,8 @@ def read_frequency(expr=None, genes=None, Xcen=None, frequency_file=None, read_f
 		fw.write("%d %d %s\n" % (1, v, t_str))
 		fw.close()
 	return list(by_cluster.keys())
-	
-if __name__=="__main__":
-	parser = argparse.ArgumentParser(description="evaluate.exact.2b.py: calculate silhouette score for randomly distributed spatial patterns", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-	parser.add_argument("-x", "--file-expr", dest="expr", type=str, required=True, help="expression matrix. Will use input binary expr.npy (if exists) to speed up reading.")
-	parser.add_argument("-c", "--file-centroid", dest="centroid", type=str, required=True, help="cell coordinate. Will use input binary Xcen.npy (if exists) to speed up reading.")
-	parser.add_argument("-w", "--overwrite-input-binary", dest="overwrite_input_bin", action="store_true", help="overwrite input binaries")
-	parser.add_argument("-r", "--rbp-p", dest="rbp_p", type=float, default=0.95, help="p parameter of RBP")
-	parser.add_argument("-e", "--examine-top", dest="examine_top", type=float, default=0.05, help="top proportion of cells per gene to be 1's (expressed)")
-	parser.add_argument("-m", "--matrix-type", dest="matrix_type", type=str, choices=["sim", "dissim"], help="whether to calculate similarity matrix or dissimilarity matrix", default="dissim")
-	parser.add_argument("-o", "--output-dir", dest="output", type=str, default=".", help="output directory")
-	parser.add_argument("-q", "--query-sizes", dest="query_sizes", type=int, default=10, help="query sizes (advanced user setting)")
 
-	args = parser.parse_args()
-	#expr, Xcen, sizes = read(frequency_file=sys.argv[1], read_from_file=True)
-	#rbp_p = float(sys.argv[1])
-	#examine_top = float(sys.argv[2])
+def do_one(args):
 	matrix_type = args.matrix_type
 	rbp_p = args.rbp_p
 	examine_top = args.examine_top
@@ -172,6 +153,13 @@ if __name__=="__main__":
 
 	if not os.path.isdir(args.output):
 		os.mkdir(args.output)
+
+	logdir="%s/logs" % args.output
+	if not os.path.isdir(logdir):
+		os.mkdir(logdir)
+	log_file = "%s/%.2f_%.3f.out" % (logdir, args.rbp_p, args.examine_top)
+	logger = logging.getLogger("random_%.2f_%.3f" % (args.rbp_p, args.examine_top))
+	logger.setLevel(logging.DEBUG)
 	
 	t_overwrite = args.overwrite_input_bin
 	#if there is no binary input file, create one
@@ -183,20 +171,17 @@ if __name__=="__main__":
 
 	expr, Xcen, genes, t_matrix = None, None, None, None
 	if t_overwrite:
-		expr, genes, Xcen = read_matrix(f_expr=args.expr, f_Xcen=args.centroid)
-		sys.stderr.write("Calculate all pairwise Euclidean distance between cells using their physical coordinates\n")
-		sys.stderr.flush()
+		expr, genes, Xcen = read_matrix(f_expr=args.expr, f_Xcen=args.centroid, logger=logger)
+		logger.info("Calculate all pairwise Euclidean distance between cells using their physical coordinates")
 		euc = squareform(pdist(Xcen, metric="euclidean"))
-		sys.stderr.write("Rank transform euclidean distance, and then apply exponential transform\n")
-		sys.stderr.flush()
-		t_matrix = spatial_genes.rank_transform_matrix(euc, reverse=False, rbp_p=rbp_p, matrix_type=matrix_type, logger=logging)
+		logger.info("Rank transform euclidean distance, and then apply exponential transform")
+		t_matrix = spatial_genes.rank_transform_matrix(euc, reverse=False, rbp_p=rbp_p, matrix_type=matrix_type, logger=logger)
 		np.save("%s/t_matrix_%s_%.2f.npy" % (args.output, args.matrix_type, args.rbp_p), t_matrix)
 		np.save("%s/expr.npy" % args.output, expr)
 		np.save("%s/Xcen.npy" % args.output, Xcen)
 		np.save("%s/genes.npy" % args.output, genes)
 	else:
-		sys.stderr.write("Using existing input binaries...\n")
-		sys.stderr.flush()
+		logger.info("Using existing input binaries...")
 		expr = np.load("%s/expr.npy" % args.output)
 		Xcen = np.load("%s/Xcen.npy" % args.output)
 		genes = np.load("%s/genes.npy" % args.output)
@@ -209,8 +194,7 @@ if __name__=="__main__":
 	#euc = squareform(pdist(Xcen, metric="euclidean"))
 	#sys.stdout.write("Rank transform euclidean distance, and then apply exponential transform\n")
 	#t_matrix = spatial_genes.rank_transform_matrix(euc, reverse=False, rbp_p=rbp_p, matrix_type=matrix_type)
-	sys.stderr.write("Compute silhouette metric per gene\n")
-	sys.stderr.flush()
+	logger.info("Compute silhouette metric per gene")
 
 	outdir = "%s/result_sim_5000_%.2f_%.3f" % (args.output, rbp_p, examine_top)
 	if matrix_type=="dissim":
@@ -224,5 +208,21 @@ if __name__=="__main__":
 		copyfile("%s/do_kmeans.R" % source_path, "%s/do_kmeans.R" % outdir)
 	sizes = read_frequency(expr=expr, genes=genes, Xcen=Xcen, frequency_file=None, \
 	read_from_file=False, outdir=outdir, examine_top=examine_top, num_query_sizes=args.query_sizes)
+	res = spatial_genes.random_pattern(matrix=t_matrix, matrix_type=matrix_type, num_cell = ncell, sizes=sizes, trials_per_gene=5000, run_gpd=True, outdir=outdir, logger=logger)
+	
+def main():
+	parser = argparse.ArgumentParser(description="evaluate.exact.2b.py: calculate silhouette score for randomly distributed spatial patterns", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+	parser.add_argument("-x", "--file-expr", dest="expr", type=str, required=True, help="expression matrix. Will use input binary expr.npy (if exists) to speed up reading.")
+	parser.add_argument("-c", "--file-centroid", dest="centroid", type=str, required=True, help="cell coordinate. Will use input binary Xcen.npy (if exists) to speed up reading.")
+	parser.add_argument("-w", "--overwrite-input-binary", dest="overwrite_input_bin", action="store_true", help="overwrite input binaries")
+	parser.add_argument("-r", "--rbp-p", dest="rbp_p", type=float, default=0.95, help="p parameter of RBP")
+	parser.add_argument("-e", "--examine-top", dest="examine_top", type=float, default=0.05, help="top proportion of cells per gene to be 1's (expressed)")
+	parser.add_argument("-m", "--matrix-type", dest="matrix_type", type=str, choices=["sim", "dissim"], help="whether to calculate similarity matrix or dissimilarity matrix", default="dissim")
+	parser.add_argument("-o", "--output-dir", dest="output", type=str, default=".", help="output directory")
+	parser.add_argument("-q", "--query-sizes", dest="query_sizes", type=int, default=10, help="query sizes (advanced user setting)")
 
-	res = spatial_genes.random_pattern(matrix=t_matrix, matrix_type=matrix_type, num_cell = ncell, sizes=sizes, trials_per_gene=5000, run_gpd=True, outdir=outdir)
+	args = parser.parse_args()
+	do_one(args)
+
+if __name__=="__main__":
+	main()

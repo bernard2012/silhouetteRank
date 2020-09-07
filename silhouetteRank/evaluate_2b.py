@@ -110,7 +110,7 @@ def do_one(args):
 	logger.info("Compute silhouette metric per gene")
 	#sys.stderr.flush()
 	examine_top = args.examine_top
-	res = spatial_genes.calc_silhouette_per_gene(genes=genes, expr=expr, matrix=t_matrix, matrix_type=matrix_type, examine_top=examine_top)
+	res = spatial_genes.calc_silhouette_per_gene(genes=genes, expr=expr, matrix=t_matrix, matrix_type=matrix_type, examine_top=examine_top, logger=logger)
 	if matrix_type=="sim":
 		f_name = "%s/silhouette.sim.exact.rbp.%.2f.top.%.3f.txt" % (args.output, rbp_p, examine_top)
 	else:
