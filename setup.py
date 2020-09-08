@@ -42,7 +42,7 @@ class CustomCommands(setuptools.Command):
 
 setuptools.setup(
 	name="silhouetteRank",
-	version="1.0.5.11",
+	version="1.0.5.13",
 	author="Qian Zhu",
 	author_email="zqian@jimmy.harvard.edu",
 	description="silhouetteRank is a tool for finding spatially variable genes based on computing silhouette coefficient from binarized spatial gene expression data",
@@ -55,6 +55,11 @@ setuptools.setup(
 			"silhouette_rank_one = silhouetteRank.silhouette_rank_one:main",
 			"silhouette_rank_main = silhouetteRank.evaluate_2b:main",
 			"silhouette_rank_random = silhouetteRank.evaluate_exact_one_2b:main",
+			"silhouette_rank_random_batch = silhouetteRank.evaluate_exact_2b:main",
+			"slrank_fast = silhouetteRank.evaluate_fast_2b:main",
+			"slrank_random_fast = silhouetteRank.evaluate_fast_one_2b:main",
+			"slrank_prep_fast = silhouetteRank.prep_fast:main",
+			"slrank_combine_fast = silhouetteRank.combine_fast:main",
 		]
 	},
 	classifiers=(

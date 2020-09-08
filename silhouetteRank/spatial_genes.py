@@ -166,15 +166,14 @@ def random_pattern(matrix=None, matrix_type="dissim", num_cell=None, sizes=None,
 		ind+=1
 	return rand_sil
 
-def calc_silhouette_per_gene_approx(genes=None, expr=None, matrix=None, matrix_type="dissim", examine_top=0.1, seed=-1):
+def calc_silhouette_per_gene_approx(genes=None, expr=None, matrix=None, matrix_type="dissim", examine_top=0.1, seed=-1, logger=logging):
 	if genes is None or expr is None or matrix is None:
 		sys.stderr.write("Need genes, expr, similarity/dissimilarity matrix\n")
 		sys.stderr.flush()
 		return ;
 	if seed!=-1 and seed>=0:
 		np.random.seed(seed)
-	sys.stderr.write("Started 2 " + "\n")
-	sys.stderr.flush()
+	logger.info("Started calc silhouette per gene approx")
 	sil = []
 	ncell = expr.shape[1]
 	ex = int((1.0-examine_top)*100.0)
@@ -199,8 +198,7 @@ def calc_silhouette_per_gene_approx(genes=None, expr=None, matrix=None, matrix_t
 			clust[gt_eq] = 1
 			clust[lt] = 2
 		if ig%100==0:
-			sys.stderr.write("%s %d / %d\n" % (g, ig, len(genes)))
-			sys.stderr.flush()
+			logger.info("%s %d / %d" % (g, ig, len(genes)))
 		if matrix_type=="dissim":
 			avg_clust1_sil = get_distance_per_FD_2(matrix, ncell, clust, outcome=[1,2])
 		elif matrix_type=="sim":
