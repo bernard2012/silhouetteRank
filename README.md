@@ -140,21 +140,19 @@ In this example, we request one job per combination of (i, j, k). Hence there wi
 Once all the jobs are complete, combine the results together to generate a final score list.
 Note this step does not need to run using SLURM scheduler.
 ```bash
-python3 ~/.local/lib/python3.6/site-packages/silhouetteRank/combine.py -i . -o silhouette_overall_pval.txt -l master.combine.log -v -r 0.95 0.99 -e 0.005 0.01 0.05 0.1 0.3 -m dissim 
+python3 ~/.local/lib/python3.6/site-packages/silhouetteRank/combine_2.py -i . -v -r 0.95 0.99 -e 0.005 0.01 0.05 0.1 0.3 -m dissim 
 ```
 
 **Table 2**. Explanations of `combine.py`: 
 | param | explanation |
 | ----- | ------------------ |
 | -i | The results directory (containing directories like result_5000_0.95_0.300) |
-| -o | Output file |
-| -l | Log file name (just file name, no path) |
 | -v | Verbose |
 | -r | Array. Float. Local spatial distance weighting constant. (recommend 0.95 - 0.995) |
 | -e | Array. Float. Top proportion of cells to binarize to 1 (0 - 1) |
 | -m | dissim or sim. Use dissimilarity matrix (default) or similarity matrix |
 
-The final result is saved in the file `silhouette.overall.pval.txt`.
+The final result is saved in the file `silhouette.overall.pval.txt` located in the results directory.
 
 Note: the parameter settings for `-r` and `-e` work well for most datasets. Users can safely use the same commands for all datasets.
 
