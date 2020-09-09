@@ -78,7 +78,8 @@ Create a SLURM **job submission script** `do_one.sh`. This script computes null 
 vim do_one.sh
 ```
 Press `i` (for insert). Paste the following content:
-```
+
+```bash
 #!/bin/bash
 #SBATCH -n 1                               # Request one core
 #SBATCH -N 1                               # Request one node (if you request more than one core with -n, also using
